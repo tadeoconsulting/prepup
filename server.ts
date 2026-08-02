@@ -1,7 +1,5 @@
 import express from "express";
 import path from "path";
-import fs from "fs";
-import { execSync } from "child_process";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
@@ -9,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 app.use(express.json());
 
@@ -28,46 +26,6 @@ function getGenAI() {
     },
   });
 }
-
-// Endpoint: Download compiled ZIP for cPanel or static hosting
-app.get("/download-zip", (_req, res) => {
-  const filePath = path.join(process.cwd(), "dist.zip");
-  if (fs.existsSync(filePath)) {
-    res.download(filePath, "dist.zip");
-  } else {
-    res.status(404).json({ error: "dist.zip no encontrado. Ejecuta la compilación primero." });
-  }
-});
-
-// Endpoint: Download full source code project as ZIP
-app.get("/api/download-source", (_req, res) => {
-  try {
-    const pythonScript = `import zipfile, os
-zip_filename = 'proyecto-completo.zip'
-with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as z:
-    for root, dirs, files in os.walk('.'):
-        if 'node_modules' in root or 'dist' in root or '.git' in root or '.cache' in root:
-            continue
-        for file in files:
-            if file.endswith('.zip') or file.endswith('.tar.gz'):
-                continue
-            filepath = os.path.join(root, file)
-            z.write(filepath, os.path.relpath(filepath, '.'))
-`;
-    execSync(`python3 -c "${pythonScript.replace(/\n/g, '; ')}"`, { cwd: process.cwd() });
-    const filePath = path.join(process.cwd(), "proyecto-completo.zip");
-    if (fs.existsSync(filePath)) {
-      res.setHeader("Content-Type", "application/zip");
-      res.setHeader("Content-Disposition", "attachment; filename=proyecto-completo.zip");
-      return res.download(filePath, "proyecto-completo.zip");
-    } else {
-      return res.status(500).json({ error: "No se pudo generar el archivo ZIP." });
-    }
-  } catch (err: any) {
-    console.error("Error creating source zip:", err);
-    return res.status(500).json({ error: "Error al empaquetar el código fuente", details: err.message });
-  }
-});
 
 // API Health Check
 app.get("/api/health", (_req, res) => {

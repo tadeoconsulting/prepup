@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { UserPlan, LatinCountry, PreparationDuration } from "../types";
 import { LATIN_EXAM_PRESETS } from "../data/presetProfiles";
-import { Settings, GraduationCap, Calendar, Clock, ArrowRight, CheckCircle2, Download, Server, HardDrive } from "lucide-react";
+import { Settings, GraduationCap, Calendar, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
 
 interface PlanSetupWizardProps {
   currentPlan: UserPlan;
@@ -19,32 +19,6 @@ export const PlanSetupWizard: React.FC<PlanSetupWizardProps> = ({
   const [targetCareer, setTargetCareer] = useState(currentPlan.targetCareer);
   const [durationMonths, setDurationMonths] = useState<PreparationDuration>(currentPlan.durationMonths);
   const [dailyHours, setDailyHours] = useState(currentPlan.dailyStudyHoursGoal);
-  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
-
-  const handleDownloadZip = async () => {
-    try {
-      setIsDownloadingZip(true);
-      const response = await fetch("/api/download-source");
-      if (!response.ok) {
-        throw new Error("No se pudo obtener el archivo ZIP");
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = "proyecto-completo.zip";
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error("Download failed:", err);
-      alert("Hubo un error al intentar descargar el código fuente.");
-    } finally {
-      setIsDownloadingZip(false);
-    }
-  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,28 +158,6 @@ export const PlanSetupWizard: React.FC<PlanSetupWizardProps> = ({
             <option value={4}>4 Horas al día (Intensivo)</option>
             <option value={6}>6 Horas al día (Súper Intensivo)</option>
           </select>
-        </div>
-
-        {/* Local Hosting & Download Section */}
-        <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 space-y-2">
-          <div className="flex items-center space-x-2 text-emerald-900 font-black text-xs uppercase tracking-wider">
-            <HardDrive className="w-4 h-4 text-emerald-600" />
-            <span>Alojar Localmente / Descargar Proyecto (.zip)</span>
-          </div>
-          <p className="text-[11px] text-emerald-800 font-semibold leading-relaxed">
-            Puedes descargar todo el código fuente de la aplicación en un archivo comprimido `.zip` para ejecutarlo localmente en tu computadora con Node.js (`npm run dev`) o desplegarlo en tu servidor privado.
-          </p>
-          <div className="pt-1">
-            <button
-              type="button"
-              onClick={handleDownloadZip}
-              disabled={isDownloadingZip}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black rounded-xl text-xs transition-all shadow-sm cursor-pointer"
-            >
-              <Download className={`w-4 h-4 ${isDownloadingZip ? "animate-bounce" : ""}`} />
-              <span>{isDownloadingZip ? "Generando y Descargando ZIP..." : "Descargar Código Fuente Completo (.zip)"}</span>
-            </button>
-          </div>
         </div>
 
         {/* Actions */}

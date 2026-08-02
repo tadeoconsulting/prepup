@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { UserPlan, PlatformUser } from "../types";
-import { GraduationCap, Calendar, Flame, Clock, HelpCircle, Settings, BookOpen, Target, Sparkles, Compass, Users, Database, Shield, LogOut, Globe, Menu, X, Download } from "lucide-react";
+import { GraduationCap, Calendar, Flame, Clock, HelpCircle, Settings, BookOpen, Target, Sparkles, Compass, Users, Database, Shield, LogOut, Menu, X } from "lucide-react";
 
 export type NavTab = "dashboard" | "planner" | "simulacro" | "agraria" | "questions" | "ai_tutor" | "users_admin" | "repo_admin" | "auth" | "landing" | "parent_portal";
 
@@ -17,32 +17,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, onOpenSettings, onOpenOnboarding, currentUser, pendingUsersCount = 0, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
-
-  const handleDownloadZip = async () => {
-    try {
-      setIsDownloadingZip(true);
-      const response = await fetch("/api/download-source");
-      if (!response.ok) {
-        throw new Error("No se pudo obtener el archivo ZIP");
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = "proyecto-completo.zip";
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error("Download failed:", err);
-      alert("Hubo un error al intentar descargar el código fuente.");
-    } finally {
-      setIsDownloadingZip(false);
-    }
-  };
 
   // Calculate days remaining until exam safely
   const examDate = plan?.examDate ? new Date(plan.examDate) : new Date(Date.now() + 180 * 86400000);
@@ -122,27 +96,6 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                   <span>Tour</span>
                 </button>
               )}
-
-              {/* Public Landing Link */}
-              <button
-                onClick={() => setActiveTab("landing")}
-                className="hidden md:flex px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs items-center space-x-1 transition-all border border-slate-200 cursor-pointer min-h-[38px]"
-                title="Ir a la Landing Page Pública"
-              >
-                <Globe className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Inicio Público</span>
-              </button>
-
-              {/* Download ZIP Button */}
-              <button
-                onClick={handleDownloadZip}
-                disabled={isDownloadingZip}
-                className="hidden lg:flex px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 text-emerald-800 font-bold rounded-xl text-xs items-center space-x-1.5 transition-all border border-emerald-300 cursor-pointer min-h-[38px]"
-                title="Descargar código fuente completo en un archivo .zip"
-              >
-                <Download className={`w-3.5 h-3.5 text-emerald-600 ${isDownloadingZip ? "animate-bounce" : ""}`} />
-                <span>{isDownloadingZip ? "Descargando..." : "Descargar .ZIP"}</span>
-              </button>
 
               {/* Settings Button */}
               <button
@@ -482,16 +435,6 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                 )}
                 <button
                   onClick={() => {
-                    setActiveTab("landing");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center space-x-3 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-                >
-                  <Globe className="w-4 h-4 text-indigo-600" />
-                  <span>Ir a Inicio Público</span>
-                </button>
-                <button
-                  onClick={() => {
                     onOpenSettings();
                     setIsMobileMenuOpen(false);
                   }}
@@ -499,17 +442,6 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                 >
                   <Settings className="w-4 h-4 text-slate-600" />
                   <span>Configurar Plan y Universidad</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    handleDownloadZip();
-                  }}
-                  disabled={isDownloadingZip}
-                  className="w-full flex items-center space-x-3 px-3.5 py-2 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 transition-colors cursor-pointer"
-                >
-                  <Download className={`w-4 h-4 text-emerald-600 ${isDownloadingZip ? "animate-bounce" : ""}`} />
-                  <span>{isDownloadingZip ? "Descargando Código Fuente..." : "Descargar Código Fuente (.ZIP)"}</span>
                 </button>
                 {onLogout && (
                   <button
