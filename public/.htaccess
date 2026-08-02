@@ -1,0 +1,8 @@
+# Configuración para React SPA en cPanel (Subcarpeta /apps/prepup/)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /apps/prepup/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>

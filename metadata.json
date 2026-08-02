@@ -1,0 +1,6 @@
+{
+  "name": "Rumbo a la U - Plan Preuniversitario",
+  "description": "Plataforma de preparación y seguimiento para el examen de ingreso a la universidad en Latinoamérica con simulacros e IA",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
