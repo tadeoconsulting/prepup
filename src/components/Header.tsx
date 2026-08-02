@@ -8,7 +8,7 @@ interface HeaderProps {
   plan: UserPlan;
   activeTab: NavTab;
   setActiveTab: (tab: NavTab) => void;
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void;
   onOpenOnboarding?: () => void;
   currentUser?: PlatformUser;
   pendingUsersCount?: number;
@@ -97,50 +97,20 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                 </button>
               )}
 
-              {/* Settings Button */}
-              <button
-                onClick={onOpenSettings}
-                className="p-2 sm:p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 hover:text-slate-900 transition-colors border border-slate-200 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
-                title="Configurar Plan y Universidad"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
+              {/* Settings Button (First-time login only) */}
+              {onOpenSettings && (
+                <button
+                  onClick={onOpenSettings}
+                  className="p-2 sm:p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 hover:text-slate-900 transition-colors border border-slate-200 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                  title="Configurar Plan y Universidad"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+              )}
 
               {/* Login / User Profile Pill Button */}
               {currentUser ? (
                 <div className="flex items-center space-x-1.5">
-                  <button
-                    onClick={() => setActiveTab("auth")}
-                    className={`px-3 py-1.5 rounded-2xl border text-xs flex items-center space-x-2 transition-all cursor-pointer min-h-[38px] shadow-2xs ${
-                      currentUser.role === "admin"
-                        ? "bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900"
-                        : currentUser.role === "parent"
-                        ? "bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-900"
-                        : currentUser.status === "activo"
-                        ? "bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-900"
-                        : "bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-900"
-                    }`}
-                    title="Cambiar perfil de usuario"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center font-black text-[11px] shadow-xs shrink-0">
-                      {currentUser.role === "admin" ? "🛡️" : currentUser.role === "parent" ? "👨‍👩‍👦" : "🎓"}
-                    </div>
-                    <div className="text-left hidden xs:block">
-                      <span className="font-black block truncate max-w-[100px] sm:max-w-[120px] leading-tight">
-                        {currentUser.name.split(" ")[0]}
-                      </span>
-                      <span className="text-[9px] font-bold block opacity-80 uppercase tracking-wider">
-                        {currentUser.role === "admin"
-                          ? "Admin"
-                          : currentUser.role === "parent"
-                          ? "Apoderado"
-                          : currentUser.status === "activo"
-                          ? "Alumno"
-                          : "Pendiente"}
-                      </span>
-                    </div>
-                  </button>
-
                   {onLogout && (
                     <button
                       onClick={onLogout}
@@ -433,16 +403,18 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                     <span>Ver Tour Guía Interactivo</span>
                   </button>
                 )}
-                <button
-                  onClick={() => {
-                    onOpenSettings();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center space-x-3 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-                >
-                  <Settings className="w-4 h-4 text-slate-600" />
-                  <span>Configurar Plan y Universidad</span>
-                </button>
+                {onOpenSettings && (
+                  <button
+                    onClick={() => {
+                      onOpenSettings();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center space-x-3 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                  >
+                    <Settings className="w-4 h-4 text-slate-600" />
+                    <span>Configurar Plan y Universidad</span>
+                  </button>
+                )}
                 {onLogout && (
                   <button
                     onClick={() => {

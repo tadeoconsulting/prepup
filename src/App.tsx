@@ -208,6 +208,34 @@ export default function App() {
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
 
+  // Tracks every user id that has ever logged in, so we can tell first-time logins apart from returning ones
+  const [seenUserIds, setSeenUserIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("preu_seen_user_ids");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("preu_seen_user_ids", JSON.stringify(seenUserIds));
+  }, [seenUserIds]);
+
+  // Whether the CURRENT session's login is that user's first ever (kept true for the whole session, even across refreshes)
+  const [isFirstLoginSession, setIsFirstLoginSession] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("preu_first_login_session") === "true";
+    } catch (e) {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("preu_first_login_session", String(isFirstLoginSession));
+  }, [isFirstLoginSession]);
+
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem("preu_current_user", JSON.stringify(currentUser));
@@ -373,19 +401,20 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#F0F4F8] text-[#2D3436] font-sans selection:bg-[#4D96FF] selection:text-white pb-24 sm:pb-12">
+      <div className="min-h-screen bg-[#F0F4F8] text-[#2D3436] font-sans selection:bg-[#4D96FF] selection:text-white">
         {/* Header with Navigation - Displayed ONLY when user is logged in */}
         {currentUser && activeTab !== "landing" && activeTab !== "auth" && (
           <Header
             plan={plan}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            onOpenSettings={() => setShowSettingsModal(true)}
+            onOpenSettings={isFirstLoginSession ? () => setShowSettingsModal(true) : undefined}
             onOpenOnboarding={() => setShowOnboarding(true)}
             currentUser={currentUser}
             pendingUsersCount={pendingUsersCount}
             onLogout={() => {
               setCurrentUser(null);
+              setIsFirstLoginSession(false);
               setActiveTab("landing");
             }}
           />
@@ -412,6 +441,11 @@ export default function App() {
                 users={users}
                 universities={universities}
                 onLogin={(user) => {
+                  const firstTime = !seenUserIds.includes(user.id);
+                  setIsFirstLoginSession(firstTime);
+                  if (firstTime) {
+                    setSeenUserIds((prev) => [...prev, user.id]);
+                  }
                   setCurrentUser(user);
                   // Redirect depending on role
                   if (user.role === "admin") {

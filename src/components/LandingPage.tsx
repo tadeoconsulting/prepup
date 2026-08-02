@@ -6,8 +6,6 @@ import {
   CheckCircle2,
   Sparkles,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
   Users,
   Mail,
@@ -221,61 +219,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </div>
 
       {/* HERO CAROUSEL SECTION */}
-      <section id="hero" className="relative bg-slate-900 text-white overflow-hidden min-h-[calc(100vh-72px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-start py-6 sm:py-8 lg:py-10">
+      <section id="hero" className="relative bg-slate-900 text-white overflow-hidden min-h-[calc(100vh-72px)] sm:min-h-[820px] lg:min-h-[950px] flex flex-col justify-start py-6 sm:py-8 lg:py-10">
         {/* Background Decorative Gradients */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#4D96FF]/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6BCB77]/15 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex-1 flex flex-col justify-start space-y-4 sm:space-y-6">
-          {/* Slide Switcher Controls Top (Hidden on mobile) */}
-          <div className="hidden sm:flex sm:flex-row sm:items-center justify-between mb-2 pb-4 border-b border-slate-800 gap-3">
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex items-center gap-2">
-              <button
-                onClick={() => setCurrentSlide(0)}
-                className={`py-3 px-4 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center space-x-2 min-h-[44px] ${
-                  currentSlide === 0
-                    ? "bg-[#4D96FF] text-white shadow-lg ring-2 ring-blue-400/30"
-                    : "bg-slate-800/90 text-slate-400 hover:text-white hover:bg-slate-800"
-                }`}
-              >
-                <GraduationCap className="w-4 h-4 shrink-0" />
-                <span className="truncate">1. Acompañamiento Alumno</span>
-              </button>
-
-              <button
-                onClick={() => setCurrentSlide(1)}
-                className={`py-3 px-4 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center space-x-2 min-h-[44px] ${
-                  currentSlide === 1
-                    ? "bg-[#6BCB77] text-white shadow-lg ring-2 ring-emerald-400/30"
-                    : "bg-slate-800/90 text-slate-400 hover:text-white hover:bg-slate-800"
-                }`}
-              >
-                <Users className="w-4 h-4 shrink-0" />
-                <span className="truncate">2. Monitoreo Padres</span>
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between sm:justify-end space-x-2 text-slate-400 text-xs">
-              <div className="flex items-center space-x-1.5">
-                <button
-                  onClick={() => setCurrentSlide((prev) => (prev === 0 ? 1 : 0))}
-                  className="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center text-white"
-                  aria-label="Slide anterior"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="font-bold px-1 hidden sm:inline">{currentSlide + 1} / 2</span>
-                <button
-                  onClick={() => setCurrentSlide((prev) => (prev === 0 ? 1 : 0))}
-                  className="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center text-white"
-                  aria-label="Siguiente slide"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-
           {/* SLIDE 1 CONTENT: ESTUDIANTE ACOMPAÑAMIENTO Y CONSTANCIA */}
           {currentSlide === 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start animate-fade-in py-2">
