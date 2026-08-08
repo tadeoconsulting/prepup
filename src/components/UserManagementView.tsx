@@ -21,7 +21,10 @@ import {
   Target,
   Trash2,
   BookOpen,
-  Edit3
+  Edit3,
+  KeyRound,
+  Copy,
+  RefreshCw
 } from "lucide-react";
 
 interface UserManagementViewProps {
@@ -30,12 +33,24 @@ interface UserManagementViewProps {
   onUpdateUniversities?: (updated: UniversityItem[]) => void;
   onUpdateUserStatus: (userId: string, newStatus: UserStatus) => void;
   onUpdateUserRole: (userId: string, newRole: UserRole) => void;
+  onUpdateUserPassword: (userId: string, newPassword: string) => void;
   onAddUser: (user: Omit<PlatformUser, "id" | "registeredAt" | "simulacrosCompletedCount" | "averageScorePercentage" | "lastActive">) => void;
   onDeleteUser: (userId: string) => void;
   currentUser: PlatformUser;
-  onSwitchProfile: (user: PlatformUser) => void;
   onGoToRepositoryAdmin?: () => void;
 }
+
+const generateStrongPassword = (): string => {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const digits = "23456789";
+  const symbols = "!@#$%&*";
+  const all = upper + lower + digits + symbols;
+  const pick = (chars: string) => chars[Math.floor(Math.random() * chars.length)];
+  const required = [pick(upper), pick(lower), pick(digits), pick(symbols)];
+  const rest = Array.from({ length: 8 }, () => pick(all));
+  return [...required, ...rest].sort(() => Math.random() - 0.5).join("");
+};
 
 export const UserManagementView: React.FC<UserManagementViewProps> = ({
   users,
@@ -43,16 +58,25 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
   onUpdateUniversities,
   onUpdateUserStatus,
   onUpdateUserRole,
+  onUpdateUserPassword,
   onAddUser,
   onDeleteUser,
   currentUser,
-  onSwitchProfile,
   onGoToRepositoryAdmin,
 }) => {
   const [filterTab, setFilterTab] = useState<"todos" | "pendiente" | "activo" | "inactivo">("todos");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Change Password Modal State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordTargetUser, setPasswordTargetUser] = useState<PlatformUser | null>(null);
+  const [passwordMode, setPasswordMode] = useState<"generate" | "manual">("generate");
+  const [generatedPassword, setGeneratedPassword] = useState("");
+  const [manualPassword, setManualPassword] = useState("");
+  const [manualPasswordConfirm, setManualPasswordConfirm] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // Editable Universities & Careers Management State
   const [activeSubTab, setActiveSubTab] = useState<"users" | "universities">("users");
@@ -75,6 +99,39 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const openPasswordModal = (targetUser: PlatformUser) => {
+    setPasswordTargetUser(targetUser);
+    setPasswordMode("generate");
+    setGeneratedPassword(generateStrongPassword());
+    setManualPassword("");
+    setManualPasswordConfirm("");
+    setPasswordError(null);
+    setShowPasswordModal(true);
+  };
+
+  const handleSaveGeneratedPassword = () => {
+    if (!passwordTargetUser) return;
+    onUpdateUserPassword(passwordTargetUser.id, generatedPassword);
+    setShowPasswordModal(false);
+    showToast(`🔑 Contraseña regenerada para ${passwordTargetUser.name}.`);
+  };
+
+  const handleSaveManualPassword = () => {
+    if (!passwordTargetUser) return;
+    setPasswordError(null);
+    if (manualPassword.length < 8) {
+      setPasswordError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (manualPassword !== manualPasswordConfirm) {
+      setPasswordError("Las contraseñas no coinciden.");
+      return;
+    }
+    onUpdateUserPassword(passwordTargetUser.id, manualPassword);
+    setShowPasswordModal(false);
+    showToast(`🔑 Contraseña actualizada para ${passwordTargetUser.name}.`);
   };
 
   // Helper to update global universities
@@ -236,31 +293,6 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                 <span className="text-xs font-medium text-slate-400">({currentUser.email})</span>
               </h2>
             </div>
-          </div>
-
-          {/* Quick Profile Switch Buttons */}
-          <div className="w-full md:w-auto flex flex-wrap items-center gap-2 bg-slate-800/80 p-2 rounded-2xl border border-slate-700">
-            <span className="text-[11px] font-bold text-slate-400 px-2">Cambiar Rol:</span>
-            {users.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => {
-                  onSwitchProfile(u);
-                  showToast(`Cambiado a perfil: ${u.name} (${u.role.toUpperCase()})`);
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                  currentUser.id === u.id
-                    ? "bg-[#4D96FF] text-white shadow-md font-black"
-                    : "bg-slate-700/60 text-slate-300 hover:bg-slate-700 hover:text-white"
-                }`}
-              >
-                <span>{u.role === "admin" ? "👑" : u.status === "pendiente" ? "⏳" : "🎓"}</span>
-                <span>{u.name.split(" ")[0]}</span>
-                {u.status === "pendiente" && (
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                )}
-              </button>
-            ))}
           </div>
         </div>
       </div>
@@ -659,6 +691,14 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                         >
                           {user.role === "admin" ? "Hacer Alumno" : "Hacer Admin"}
                         </button>
+
+                        <button
+                          onClick={() => openPasswordModal(user)}
+                          className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all cursor-pointer flex items-center justify-center"
+                          title={`Cambiar contraseña de ${user.name}`}
+                        >
+                          <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -1026,6 +1066,123 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal (Admin) */}
+      {showPasswordModal && passwordTargetUser && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-fade-in">
+            <div className="flex items-center space-x-2">
+              <KeyRound className="w-5 h-5 text-amber-500" />
+              <h3 className="text-lg font-black text-slate-800">Cambiar Contraseña</h3>
+            </div>
+            <p className="text-xs text-slate-500 font-medium">
+              Usuario: <span className="font-bold text-slate-700">{passwordTargetUser.name}</span> ({passwordTargetUser.email})
+            </p>
+
+            {/* Mode Switcher */}
+            <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => setPasswordMode("generate")}
+                className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  passwordMode === "generate" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500"
+                }`}
+              >
+                Generar Automáticamente
+              </button>
+              <button
+                type="button"
+                onClick={() => setPasswordMode("manual")}
+                className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  passwordMode === "manual" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500"
+                }`}
+              >
+                Crear Manualmente
+              </button>
+            </div>
+
+            {passwordError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium">
+                {passwordError}
+              </div>
+            )}
+
+            {passwordMode === "generate" ? (
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <code className="flex-1 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-800 truncate">
+                    {generatedPassword}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => setGeneratedPassword(generateStrongPassword())}
+                    title="Generar otra"
+                    className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedPassword);
+                      showToast("📋 Contraseña copiada al portapapeles.");
+                    }}
+                    title="Copiar"
+                    className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400 font-medium">
+                  Copiá esta contraseña antes de guardar — no se volverá a mostrar.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="font-bold text-slate-700 text-xs block mb-1">Nueva Contraseña:</label>
+                  <input
+                    type="password"
+                    minLength={8}
+                    placeholder="Mínimo 8 caracteres"
+                    value={manualPassword}
+                    onChange={(e) => setManualPassword(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-[#4D96FF] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 text-xs block mb-1">Confirmar Contraseña:</label>
+                  <input
+                    type="password"
+                    minLength={8}
+                    placeholder="Repite la contraseña"
+                    value={manualPasswordConfirm}
+                    onChange={(e) => setManualPasswordConfirm(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-[#4D96FF] focus:outline-none"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="pt-2 flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowPasswordModal(false)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl cursor-pointer text-xs"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={passwordMode === "generate" ? handleSaveGeneratedPassword : handleSaveManualPassword}
+                className="px-4 py-2 bg-[#4D96FF] hover:bg-blue-600 text-white font-black rounded-xl cursor-pointer text-xs"
+              >
+                Guardar Contraseña
+              </button>
+            </div>
           </div>
         </div>
       )}

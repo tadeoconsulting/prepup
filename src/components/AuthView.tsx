@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { PlatformUser, UserRole, UserStatus, UniversityItem } from "../types";
 import {
   Shield,
@@ -44,44 +44,83 @@ export const AuthView: React.FC<AuthViewProps> = ({
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
 
+  // Brute-force protection: lock out login attempts after too many failures
+  const MAX_LOGIN_ATTEMPTS = 5;
+  const LOCKOUT_SECONDS = 30;
+  const failedAttemptsRef = useRef(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [lockSecondsLeft, setLockSecondsLeft] = useState(0);
+
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const tick = () => {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
+      if (remaining <= 0) {
+        setLockedUntil(null);
+        setLockSecondsLeft(0);
+        failedAttemptsRef.current = 0;
+      } else {
+        setLockSecondsLeft(remaining);
+      }
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [lockedUntil]);
+
   // Register Form State
   const [regName, setRegName] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regUniversity, setRegUniversity] = useState(universities[0]?.name || "UNMSM (San Marcos)");
   const [regCareer, setRegCareer] = useState("Medicina Humana");
+  const [regError, setRegError] = useState<string | null>(null);
   const [registerSuccessMsg, setRegisterSuccessMsg] = useState<string | null>(null);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
 
+    if (lockedUntil && Date.now() < lockedUntil) {
+      setLoginError(`Demasiados intentos fallidos. Intenta nuevamente en ${lockSecondsLeft}s.`);
+      return;
+    }
+
     const emailClean = loginEmail.trim().toLowerCase();
     const foundUser = users.find(
       (u) => u.email.toLowerCase() === emailClean && u.role === loginRole
     );
+    // Password is only enforced if the account has one AND the user typed one (demo accounts allow blank)
+    const passwordOk = !!foundUser && (!foundUser.password || !loginPassword || foundUser.password === loginPassword);
 
-    if (!foundUser) {
-      setLoginError(
-        `No encontramos una cuenta de tipo ${
-          loginRole === "admin" ? "Administrador" : "Estudiante"
-        } registrada con el correo "${loginEmail}".`
-      );
+    if (!foundUser || !passwordOk) {
+      // Generic message on purpose: don't reveal whether the email/role combination exists
+      failedAttemptsRef.current += 1;
+      if (failedAttemptsRef.current >= MAX_LOGIN_ATTEMPTS) {
+        failedAttemptsRef.current = 0;
+        setLockedUntil(Date.now() + LOCKOUT_SECONDS * 1000);
+        setLoginError(`Demasiados intentos fallidos. Intenta nuevamente en ${LOCKOUT_SECONDS}s.`);
+      } else {
+        setLoginError("Correo, contraseña o rol incorrectos.");
+      }
       return;
     }
 
-    // Check password if set, or accept default
-    if (foundUser.password && loginPassword && foundUser.password !== loginPassword) {
-      setLoginError("La contraseña ingresada es incorrecta.");
-      return;
-    }
-
+    failedAttemptsRef.current = 0;
     onLogin(foundUser);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setRegError(null);
+
     if (!regName.trim() || !regEmail.trim() || !regPassword.trim()) {
+      setRegError("Completa todos los campos obligatorios.");
+      return;
+    }
+
+    if (regPassword.length < 8) {
+      setRegError("La contraseña debe tener al menos 8 caracteres.");
       return;
     }
 
@@ -272,10 +311,11 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#4D96FF] hover:bg-blue-600 text-white font-black rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm"
+                disabled={!!lockedUntil}
+                className="w-full py-3 bg-[#4D96FF] hover:bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm"
               >
-                <span>Ingresar a la Plataforma</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>{lockedUntil ? `Espera ${lockSecondsLeft}s...` : "Ingresar a la Plataforma"}</span>
+                {!lockedUntil && <ArrowRight className="w-4 h-4" />}
               </button>
             </form>
           )}
@@ -294,6 +334,13 @@ export const AuthView: React.FC<AuthViewProps> = ({
                 <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center space-x-2 font-bold animate-fade-in">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>{registerSuccessMsg}</span>
+                </div>
+              )}
+
+              {regError && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center space-x-2 font-medium animate-fade-in">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{regError}</span>
                 </div>
               )}
 
@@ -334,7 +381,8 @@ export const AuthView: React.FC<AuthViewProps> = ({
                   <input
                     type="password"
                     required
-                    placeholder="••••••••"
+                    minLength={8}
+                    placeholder="Mínimo 8 caracteres"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6BCB77] focus:outline-none"

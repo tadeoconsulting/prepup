@@ -302,6 +302,15 @@ export default function App() {
     }
   };
 
+  const handleUpdateUserPassword = (userId: string, newPassword: string) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, password: newPassword } : u))
+    );
+    if (currentUser?.id === userId) {
+      setCurrentUser((prev) => (prev ? { ...prev, password: newPassword } : null));
+    }
+  };
+
   const handleAddUser = (
     newUser: Omit<
       PlatformUser,
@@ -513,10 +522,10 @@ export default function App() {
               onUpdateUniversities={setUniversities}
               onUpdateUserStatus={handleUpdateUserStatus}
               onUpdateUserRole={handleUpdateUserRole}
+              onUpdateUserPassword={handleUpdateUserPassword}
               onAddUser={handleAddUser}
               onDeleteUser={handleDeleteUser}
               currentUser={currentUser}
-              onSwitchProfile={(u) => setCurrentUser(u)}
               onGoToRepositoryAdmin={() => setActiveTab("repo_admin")}
             />
           )}
