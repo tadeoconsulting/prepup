@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                 <button
                   onClick={onOpenSettings}
                   className="p-2 sm:p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 hover:text-slate-900 transition-colors border border-slate-200 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
-                  title="Configurar Plan y Universidad"
+                  title="Personalizar"
                 >
                   <Settings className="w-4 h-4" />
                 </button>
@@ -227,7 +227,9 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                         <span>Banco de Preguntas</span>
                       </div>
                     </button>
-
+                  </>
+                ) : (
+                  <>
                     <button
                       onClick={() => {
                         setActiveTab("dashboard");
@@ -241,7 +243,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                     >
                       <div className="flex items-center space-x-2.5">
                         <Target className="w-4 h-4" />
-                        <span>Mi Camino</span>
+                        <span>Mi Ruta</span>
                       </div>
                     </button>
 
@@ -275,60 +277,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                     >
                       <div className="flex items-center space-x-2.5">
                         <GraduationCap className="w-4 h-4" />
-                        <span>Simulacros</span>
-                      </div>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveTab("dashboard");
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs rounded-xl transition-all cursor-pointer ${
-                        activeTab === "dashboard"
-                          ? "bg-[#4D96FF] text-white font-black"
-                          : "bg-slate-100 text-slate-700 font-bold hover:bg-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2.5">
-                        <Target className="w-4 h-4" />
-                        <span>Mi Camino</span>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveTab("planner");
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs rounded-xl transition-all cursor-pointer ${
-                        activeTab === "planner"
-                          ? "bg-[#4D96FF] text-white font-black"
-                          : "bg-slate-100 text-slate-700 font-bold hover:bg-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2.5">
-                        <BookOpen className="w-4 h-4" />
-                        <span>Plan Diario & Pomodoro</span>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveTab("simulacro");
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs rounded-xl transition-all cursor-pointer ${
-                        activeTab === "simulacro"
-                          ? "bg-[#FF6B6B] text-white font-black"
-                          : "bg-slate-100 text-slate-700 font-bold hover:bg-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2.5">
-                        <GraduationCap className="w-4 h-4" />
-                        <span>Simulacros de Admisión</span>
+                        <span>Simulacro</span>
                       </div>
                     </button>
 
@@ -345,7 +294,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                     >
                       <div className="flex items-center space-x-2.5">
                         <span>🌿</span>
-                        <span>Reto UNALM (Gamificado)</span>
+                        <span>Reto</span>
                       </div>
                     </button>
 
@@ -362,7 +311,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                     >
                       <div className="flex items-center space-x-2.5">
                         <Sparkles className="w-4 h-4 text-amber-500" />
-                        <span>Tutor IA Explicador</span>
+                        <span>Tutor</span>
                       </div>
                     </button>
 
@@ -412,7 +361,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                     className="w-full flex items-center space-x-3 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                   >
                     <Settings className="w-4 h-4 text-slate-600" />
-                    <span>Configurar Plan y Universidad</span>
+                    <span>Personalizar</span>
                   </button>
                 )}
                 {onLogout && (
@@ -489,7 +438,9 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                   <Database className="w-4 h-4 text-purple-600" />
                   <span>Banco de Preguntas</span>
                 </button>
-
+              </>
+            ) : (
+              <>
                 <button
                   onClick={() => setActiveTab("dashboard")}
                   className={`flex items-center space-x-2 px-4 py-2.5 text-xs rounded-xl transition-all duration-150 whitespace-nowrap cursor-pointer ${
@@ -499,7 +450,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                   }`}
                 >
                   <Target className="w-4 h-4" />
-                  <span>Mi Camino</span>
+                  <span>Mi Ruta</span>
                 </button>
 
                 <button
@@ -523,45 +474,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                   }`}
                 >
                   <GraduationCap className="w-4 h-4" />
-                  <span>Simulacros</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setActiveTab("dashboard")}
-                  className={`flex items-center space-x-2 px-4 py-2.5 text-xs rounded-xl transition-all duration-150 whitespace-nowrap cursor-pointer ${
-                    activeTab === "dashboard"
-                      ? "bg-[#4D96FF] text-white font-black border-2 border-blue-600 shadow-md shadow-blue-500/30"
-                      : "bg-slate-100/90 text-slate-700 font-bold border border-slate-200/90 shadow-2xs hover:bg-[#EBF3FF] hover:text-[#4D96FF]"
-                  }`}
-                >
-                  <Target className="w-4 h-4" />
-                  <span>Mi Camino</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab("planner")}
-                  className={`flex items-center space-x-2 px-4 py-2.5 text-xs rounded-xl transition-all duration-150 whitespace-nowrap cursor-pointer ${
-                    activeTab === "planner"
-                      ? "bg-[#4D96FF] text-white font-black border-2 border-blue-600 shadow-md shadow-blue-500/30"
-                      : "bg-slate-100/90 text-slate-700 font-bold border border-slate-200/90 shadow-2xs hover:bg-[#EBF3FF] hover:text-[#4D96FF]"
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span>Plan Diario & Pomodoro</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab("simulacro")}
-                  className={`flex items-center space-x-2 px-4 py-2.5 text-xs rounded-xl transition-all duration-150 whitespace-nowrap cursor-pointer ${
-                    activeTab === "simulacro"
-                      ? "bg-[#FF6B6B] text-white font-black border-2 border-red-600 shadow-md shadow-red-500/30"
-                      : "bg-slate-100/90 text-slate-700 font-bold border border-slate-200/90 shadow-2xs hover:bg-[#FFF5F5] hover:text-[#FF6B6B]"
-                  }`}
-                >
-                  <GraduationCap className="w-4 h-4" />
-                  <span>Simulacros</span>
+                  <span>Simulacro</span>
                 </button>
 
                 <button
@@ -573,7 +486,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                   }`}
                 >
                   <span className="text-base">🌿</span>
-                  <span>Reto UNALM</span>
+                  <span>Reto</span>
                   <span className="bg-emerald-200/70 text-[#1E5627] text-[10px] font-black px-1.5 py-0.2 rounded-md">
                     Gamificado
                   </span>
@@ -588,7 +501,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
                   }`}
                 >
                   <Sparkles className="w-4 h-4 text-amber-200" />
-                  <span>Tutor IA Explicador</span>
+                  <span>Tutor</span>
                 </button>
 
                 <button
@@ -664,42 +577,6 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
               <Database className="w-5 h-5 mb-0.5" />
               <span className="text-[9px] tracking-tight">Banco</span>
             </button>
-
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`flex flex-col items-center justify-center py-1 px-1.5 rounded-xl transition-all min-h-[44px] ${
-                activeTab === "dashboard"
-                  ? "text-[#4D96FF] font-black scale-105"
-                  : "text-slate-500 font-medium"
-              }`}
-            >
-              <Target className="w-5 h-5 mb-0.5" />
-              <span className="text-[9px] tracking-tight">Camino</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("planner")}
-              className={`flex flex-col items-center justify-center py-1 px-1.5 rounded-xl transition-all min-h-[44px] ${
-                activeTab === "planner"
-                  ? "text-[#4D96FF] font-black scale-105"
-                  : "text-slate-500 font-medium"
-              }`}
-            >
-              <BookOpen className="w-5 h-5 mb-0.5" />
-              <span className="text-[9px] tracking-tight">Plan</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("simulacro")}
-              className={`flex flex-col items-center justify-center py-1 px-1.5 rounded-xl transition-all min-h-[44px] ${
-                activeTab === "simulacro"
-                  ? "text-[#FF6B6B] font-black scale-105"
-                  : "text-slate-500 font-medium"
-              }`}
-            >
-              <GraduationCap className="w-5 h-5 mb-0.5" />
-              <span className="text-[9px] tracking-tight">Simulacro</span>
-            </button>
           </>
         ) : (
           <>
@@ -712,7 +589,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
               }`}
             >
               <Target className="w-5 h-5 mb-0.5" />
-              <span className="text-[9px] tracking-tight">Camino</span>
+              <span className="text-[9px] tracking-tight">Ruta</span>
             </button>
 
             <button
@@ -748,7 +625,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
               }`}
             >
               <span className="text-base mb-0.5 leading-none">🌿</span>
-              <span className="text-[9px] tracking-tight">UNALM</span>
+              <span className="text-[9px] tracking-tight">Reto</span>
             </button>
 
             <button
@@ -760,7 +637,7 @@ export const Header: React.FC<HeaderProps> = ({ plan, activeTab, setActiveTab, o
               }`}
             >
               <Sparkles className="w-5 h-5 mb-0.5 text-amber-500" />
-              <span className="text-[9px] tracking-tight">Tutor IA</span>
+              <span className="text-[9px] tracking-tight">Tutor</span>
             </button>
           </>
         )}
